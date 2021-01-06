@@ -112,14 +112,41 @@ pbmc <- NormalizeData(pbmc, normalization.method = "LogNormalize", scale.factor 
 <br>
 
 
-## Feature selection
+## Feature Selection
 
 Compute a subset of features that exhibit high cell-to-cell variation in the dataset (i.e, they are highly expressed in some cells, and lowly expressed in others). Focusing on these genes in downstream analysis helps to highlight biological signal in single-cell datasets.
+See: Comprehensive Integration of Single-Cell Data by Stuart et. al. Cell 2019.  https://pubmed.ncbi.nlm.nih.gov/31178118/
 
+Note: FindVariableFeature by default returns 2000 features per dataset.
 
+```{r}
+pbmc <- FindVariableFeatures(pbmc, selection.method = "vst", nfeatures = 2000)
 
+# Identify the 10 most highly variable genes
+top10 <- head(VariableFeatures(pbmc), 10)
 
+# plot variable features with and without labels
+plot1 <- VariableFeaturePlot(pbmc)
+plot2 <- LabelPoints(plot = plot1, points = top10, repel = TRUE)
+plot1 + plot2
 
+```
+<br>
+
+## Scaling the Data
+
+Applying a linear transformation ('scaling') is a standard pre-processing step prior to dimensional reduction. This is done by the ScaleData function in Seurt.
+What ScaleData does:
+* Shifts the expression of each gene, so that the mean expression across cells is 0
+* Scales the expression of each gene, so that the variance across cells is 1
+
+This step gives equal weight in downstream analyses, so that highly-expressed genes do not dominate
+The results of this are stored in pbmc[["RNA"]]@scale.data
+
+```{r}
+all.genes <- rownames(pbmc)
+pbmc <- ScaleData(pbmc, features = all.genes)
+```
 
 
 
